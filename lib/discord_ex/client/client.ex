@@ -95,9 +95,9 @@ defmodule DiscordEx.Client do
     {:ok, state}
   end
 
-  def ondisconnect({:remote, :closed}, _state) do
+  def ondisconnect({:remote, :closed}, state) do
     # Stub for beter actions later
-    {:close, {:remote, :closed}, _state}
+    {:close, {:remote, :closed}, state}
   end
 
   @doc """
