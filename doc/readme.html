@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.12.0">
+    <title>Discord Ex - Discord Elixir Library – Discord Elixir v1.1.8</title>
+    <link rel="stylesheet" href="dist/app-88251e7c81.css" />
+    
+    <script src="dist/sidebar_items.js"></script>
+  </head>
+  <body data-type="extras">
+
+<div class="main">
+<button class="sidebar-toggle">
+  <i class="icon-menu"></i>
+</button>
+<section class="sidebar">
+
+  
+  <a href="api-reference.html" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+        Discord Elixir
+      </h1>
+      <h2 class="sidebar-projectVersion">
+        v1.1.8
+      </h2>
+    </div>
+    
+  </a>
+
+  <div class="sidebar-search">
+    <i class="icon-search"></i>
+    <input type="text" class="sidebar-searchInput" placeholder="search" autocomplete="off" />
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+    
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+    
+
+    
+
+    
+  </ul>
+
+  <ul id="full-list" class="sidebar-fullList"></ul>
+  <div class="sidebar-noResults"></div>
+</section>
+
+<section class="content">
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+
+<h1>Discord Ex - Discord Elixir Library</h1>
+<p><a href="https://travis-ci.org/rmcafee/discord_ex"><img src="https://travis-ci.org/rmcafee/discord_ex.svg?branch=master" alt="Build Status"/></a></p>
+<p>Discord library for Elixir. I needed it and figured I’d share.</p>
+<p>This library is useful for making calls and implementing a bot as well.</p>
+<p>Please always use <a href="https://discordapp.com/developers/docs">Discord Developer Docs</a> as a reference.</p>
+<h2 id="installation"> Installation</h2><ol>
+<li><p>Add discord_ex to your list of dependencies in <code class="inline">mix.exs</code>:</p>
+<pre><code class="elixir">    # From Hex
+    def deps do
+        [{:discord_ex, &quot;~&gt; 1.1.8&quot;}]
+    end
+    ```
+</code></pre>
+<pre><code class="elixir"># From Github
+def deps do
+  [{:discord_ex, git: &quot;https://github.com/rmcafee/discord_ex.git&quot;, tag: &quot;1.1.8&quot;}]
+end
+```</code></pre>
+</li>
+<li><p>Ensure discord_ex is started before your application:</p>
+<pre><code class="elixir">    def application do
+      [applications: [:discord_ex]]
+    end
+    ```
+</code></pre>
+</li>
+<li>Look at the examples/echo_bot.ex file and you should honestly be
+ good to go.
+</li>
+</ol>
+<h2 id="realtime-and-bot-client-usage"> Realtime and Bot Client Usage</h2><p>So you want to create a bot huh? Easy peezy.</p>
+<p>1) Create a bot with a default handler to handle any event:</p>
+<pre><code class="elixir"># Default Fallback Handler for all events!
+# This way things don&#39;t blow up when you get an event you
+# have not set up a handler for.
+
+def handle_event({event, _payload}, state) do
+  IO.puts &quot;Received Event: #{event}&quot;
+  {:ok, state}
+end</code></pre>
+<p>2) Setup an event handler to handle whatever event you want:</p>
+<pre><code class="elixir">def handle_event({:message_create, payload}, state) do
+  # Your stuff happens here #
+  {:ok, state}
+end</code></pre>
+<p>3) Now to start your client it is as easy as:</p>
+<pre><code class="elixir">{:ok, bot_client } = DiscordEx.Client.start_link(%{
+    token: &lt;token&gt;,
+    handler: YourBotHandler
+})</code></pre>
+<p>where <code class="inline">YourBotHandler</code> is name of your module which implements <code class="inline">handle_event</code>.</p>
+<p>Alright you are done. Go forth and prosper!</p>
+<p><strong>As a note your bot_client is a gen_server that will have state properties that contain:</strong></p>
+<p><strong>:client_id</strong> - your ClientID, so you don’t have to constantly ask API for it</p>
+<p><strong>:rest_client</strong> - you can use this process to make calls without having to setup another rest client connection. So in your callback you can do this in your callback with ease:</p>
+<h3>Possible events:</h3>
+<p>Those events are described <a href="https://discordapp.com/developers/docs/topics/gateway#events">here</a>.</p>
+<pre><code class="elixir">:resumed
+:channel_create
+:channel_update
+:channel_delete
+:guild_update
+:guild_delete
+:guild_ban_add
+:guild_ban_remove
+:guild_emoji_update
+:guild_integrations_update
+:guild_member_add
+:guild_member_remove
+:guild_member_update
+:guild_members_chunk
+:guild_role_create
+:guild_role_update
+:guild_role_delete
+:message_create
+:message_update
+:message_delete
+:message_delete_bulk
+:presence_update
+:typing_start
+:user_settings_update
+:user_update
+:voice_server_update</code></pre>
+<pre><code class="elixir">alias DiscordEx.RestClient.Resources.User
+
+User.current(state[:rest_client])</code></pre>
+<h2 id="voice-client-usage"> Voice Client Usage</h2><p>Keep in mind you will need to have <a href="https://ffmpeg.org">ffmpeg</a> and <a href="https://github.com/nstafie/dca-rs">dca-rs</a> installed.</p>
+<p>If your dca-rs is not installed as <code class="inline">/usr/local/bin/dca-rs</code> you can provide path
+to it in your <code class="inline">config.exs</code> with:</p>
+<pre><code class="elixir">config :discord_ex, dca_rs_path: &quot;/your/path/dca-rs&quot;</code></pre>
+<p><strong>For best results that include easy accessibility and efficient process management include voice information whenoy create your client.</strong></p>
+<p>1) Create a connection with initial voice channel information and voice options:</p>
+<pre><code class="elixir">{:ok, client} = DiscordEx.Client.start_link(%{
+    token: token,
+    handler: YourHandler,
+    voice: %{
+        guild_id: &lt;guild_id&gt;,
+        channel_id: &lt;initial_channel_id&gt;,
+        self_deaf: false}
+})</code></pre>
+<p>2) Now in your handler you can access the voice client in your handlers state.</p>
+<ul>
+<li>state[:voice_client]
+</li>
+</ul>
+<p><strong>If you want to seperate your voice client from the general client:</strong></p>
+<p>1) Create a connection like before. You can attach a bot handler if you wish.</p>
+<pre><code class="elixir">{:ok, client } = DiscordEx.Client.start_link(%{token: &lt;token&gt;})</code></pre>
+<p>2) Now create a voice client as you piggy back off the bot.</p>
+<pre><code class="elixir">{:ok, voice_client} = DiscordEx.Voice.Client.connect(client, %{
+    guild_id: &lt;guild_id&gt;,
+    channel_id: &lt;channel_id&gt;
+})</code></pre>
+<p><strong>Now just pick the audio file you want to use and play it:</strong></p>
+<pre><code class="elixir">DiscordEx.Voice.Controller.play(voice_client,&quot;/path/to/your/audio.wav&quot;, %{volumne: 128})</code></pre>
+<p><strong>If you want to stop it so you can play something else just stop it:</strong></p>
+<pre><code class="elixir">DiscordEx.Voice.Controller.stop(voice_client)</code></pre>
+<h2 id="rest-client-usage"> REST Client Usage</h2><p>The easy way to use discord resources is by doing the following.</p>
+<pre><code class="elixir"># alias the resource you wish to use to make it easy on yourself
+
+alias DiscordEx.RestClient.Resources.User
+
+# Establish a connection
+{:ok, connection} = User.login(&quot;&lt;username&gt;&quot;,&quot;&lt;password&gt;&quot;)
+
+# Call on the resource and reap the results
+
+User.guilds(connection)</code></pre>
+<p>If you like going the longer route and obtained your token already - you can use resources like this:</p>
+<pre><code class="elixir"># Create a connection
+token = &quot;&lt;your-token&gt;&quot;
+{:ok, conn} = DiscordEx.RestClient.start_link(%{token: token})
+
+# Get to using the resource function for the rest client
+DiscordEx.RestClient.resource(conn, :get, &quot;users/@me/channels&quot;)
+
+# You can also user other method resources like &#39;post&#39;:
+DiscordEx.RestClient.resource(conn, :post, &quot;users/@me/channels&quot;, %{recipient_id: &lt;recipient_id&gt;})</code></pre>
+<p>The ‘resource’ function makes it a lot easier to use the library. The following methods are supported.</p>
+<pre><code class="elixir">DiscordEx.RestClient.resource(conn, :get, &lt;url&gt;)
+DiscordEx.RestClient.resource(conn, :post, &lt;url&gt;, &lt;map-of-data&gt;)
+DiscordEx.RestClient.resource(conn, :put, &lt;url&gt;, &lt;map-of-data&gt;)
+DiscordEx.RestClient.resource(conn, :patch, &lt;url&gt;, &lt;map-of-data&gt;)
+DiscordEx.RestClient.resource(conn, :delete, &lt;url&gt;)</code></pre>
+<h2><strong> The following Resources are supported - you can look at their docs for examples and more information: </strong></h2>
+<pre><code class="elixir">alias DiscordEx.RestClient.Resources.Channel
+
+Channel.bulk_delete_messages/3
+Channel.create_invite/3
+Channel.delete/2
+Channel.delete_message/3
+Channel.delete_permissions/3
+Channel.edit_permissions/4
+Channel.get/2
+Channel.get_invites/2
+Channel.messages/2
+Channel.modify/3
+Channel.send_file/3
+Channel.send_message/3
+Channel.trigger_typing/2
+Channel.update_message/4</code></pre>
+<p><a href="DiscordEx.RestClient.Resources.Channel.html">channel-resource-doc</a></p>
+<hr class="thin"/>
+<pre><code class="elixir">alias DiscordEx.RestClient.Resources.Guild
+
+Guild.ban_member/4
+Guild.bans/2
+Guild.batch_modify_roles/3
+Guild.begin_prune/3
+Guild.channels/2
+Guild.create/2
+Guild.create_channel/3
+Guild.create_empty_role/2
+Guild.create_integration/3
+Guild.delete/2
+Guild.delete_integration/3
+Guild.delete_role/3
+Guild.embed/2
+Guild.get/2
+Guild.integrations/2
+Guild.invites/2
+Guild.kick_member/3
+Guild.member/3
+Guild.members/3
+Guild.modify/3
+Guild.modify_embed/2
+Guild.modify_integration/4
+Guild.modify_member/4
+Guild.modify_role/4
+Guild.prune_count/3
+Guild.roles/2
+Guild.sync_integration/3
+Guild.unban_member/3
+Guild.voice_regions/2</code></pre>
+<p><a href="DiscordEx.RestClient.Resources.Guild.html">guild-resource-doc</a></p>
+<hr class="thin"/>
+<pre><code class="elixir">alias DiscordEx.RestClient.Resources.Image
+
+Image.avatar_url/2
+Image.icon_url/2</code></pre>
+<p><a href="DiscordEx.RestClient.Resources.Image.html">image-resource-doc</a></p>
+<hr class="thin"/>
+<pre><code class="elixir">alias DiscordEx.RestClient.Resources.Invite
+
+Invite.accept/2
+Invite.delete/2
+Invite.get/2</code></pre>
+<p><a href="DiscordEx.RestClient.Resources.Invite.html">invite-resource-doc</a></p>
+<hr class="thin"/>
+<pre><code class="elixir">alias DiscordEx.RestClient.Resources.User
+
+User.connections/1
+User.create_dm_channel/2
+User.current/1
+User.dm_channels/1
+User.get/2
+User.guilds/1
+User.leave_guild/2
+User.login/2
+User.logout/1
+User.modify/2
+User.query/3</code></pre>
+<p><a href="DiscordEx.RestClient.Resources.User.html">user-resource-doc</a></p>
+<h2 id="todos"> TODOS</h2><ul>
+<li>Would love more tests!
+</li>
+<li>DRY up some similar behaviour.
+</li>
+<li>Use it more and more - to see where developer usability can be made better
+</li>
+</ul>
+
+      <footer class="footer">
+        <p>
+          <span class="line">
+            Built using
+            <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.12.0),
+          </span>
+          <span class="line">
+            designed by
+            <a href="https://twitter.com/dignifiedquire" target="_blank" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+            </span>
+        </p>
+        <button class="night-mode-toggle" />
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+  <script src="dist/app-21f1a20b9e.js"></script>
+  </body>
+</html>
+
